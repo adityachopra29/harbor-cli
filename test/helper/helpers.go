@@ -94,3 +94,28 @@ func ConfigCleanup(t *testing.T, data *utils.HarborData) {
 	os.Unsetenv("XDG_DATA_HOME")
 	resetAll()
 }
+
+// GetTestHarborURL returns the Harbor URL for testing
+// Uses TEST_HARBOR_URL environment variable if set, otherwise falls back to demo.goharbor.io
+func GetTestHarborURL() string {
+	if url := os.Getenv("TEST_HARBOR_URL"); url != "" {
+		return url
+	}
+	return "demo.goharbor.io"
+}
+
+// GetTestHarborCredentials returns username and password for testing
+// Uses TEST_HARBOR_USERNAME and TEST_HARBOR_PASSWORD if set
+func GetTestHarborCredentials() (username, password string) {
+	username = os.Getenv("TEST_HARBOR_USERNAME")
+	password = os.Getenv("TEST_HARBOR_PASSWORD")
+	
+	if username == "" {
+		username = "admin"
+	}
+	if password == "" {
+		password = "Harbor12345"
+	}
+	
+	return username, password
+}

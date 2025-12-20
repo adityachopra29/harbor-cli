@@ -27,6 +27,15 @@ const (
 	GOLANGCILINT_VERSION = "v2.1.2"
 	GO_VERSION           = "1.25"
 	GORELEASER_VERSION   = "v2.12.2"
+
+	// Harbor E2E testing configuration
+	HARBOR_VERSION        = "v2.11.0"
+	HARBOR_ADMIN_USER     = "admin"
+	HARBOR_ADMIN_PASSWORD = "Harbor12345"
+	HARBOR_CONFIG_PATH    = "./test/e2e/harbor-config"
+	HARBOR_CORE_PORT      = 8080
+	POSTGRES_PORT         = 5432
+	REDIS_PORT            = 6379
 )
 
 func New(

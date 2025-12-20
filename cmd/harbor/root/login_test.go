@@ -25,12 +25,17 @@ func Test_Login_Success(t *testing.T) {
 	tempDir := t.TempDir()
 	data := helpers.Initialize(t, tempDir)
 	defer helpers.ConfigCleanup(t, data)
+	
+	// Get Harbor URL and credentials from environment or use defaults
+	harborURL := helpers.GetTestHarborURL()
+	username, password := helpers.GetTestHarborCredentials()
+	
 	cmd := root.LoginCommand()
 	validServerAddresses := []string{
-		"http://demo.goharbor.io:80",
-		"https://demo.goharbor.io:443",
-		"http://demo.goharbor.io",
-		"https://demo.goharbor.io",
+		"http://" + harborURL + ":80",
+		"https://" + harborURL + ":443",
+		"http://" + harborURL,
+		"https://" + harborURL,
 	}
 
 	for _, serverAddress := range validServerAddresses {
@@ -38,8 +43,8 @@ func Test_Login_Success(t *testing.T) {
 			args := []string{serverAddress}
 			cmd.SetArgs(args)
 
-			assert.NoError(t, cmd.Flags().Set("username", "harbor-cli"))
-			assert.NoError(t, cmd.Flags().Set("password", "Harbor12345"))
+			assert.NoError(t, cmd.Flags().Set("username", username))
+			assert.NoError(t, cmd.Flags().Set("password", password))
 
 			err := cmd.Execute()
 			assert.NoError(t, err, "Expected no error for server: %s", serverAddress)
@@ -52,11 +57,13 @@ func Test_Login_Failure_WrongServer(t *testing.T) {
 	data := helpers.Initialize(t, tempDir)
 	defer helpers.ConfigCleanup(t, data)
 
+	username, password := helpers.GetTestHarborCredentials()
+
 	cmd := root.LoginCommand()
 	cmd.SetArgs([]string{"wrongserver"})
 
-	assert.NoError(t, cmd.Flags().Set("username", "harbor-cli"))
-	assert.NoError(t, cmd.Flags().Set("password", "Harbor12345"))
+	assert.NoError(t, cmd.Flags().Set("username", username))
+	assert.NoError(t, cmd.Flags().Set("password", password))
 
 	err := cmd.Execute()
 	assert.Error(t, err, "Expected error for invalid server")
@@ -67,11 +74,14 @@ func Test_Login_Failure_WrongUsername(t *testing.T) {
 	data := helpers.Initialize(t, tempDir)
 	defer helpers.ConfigCleanup(t, data)
 
+	harborURL := helpers.GetTestHarborURL()
+	_, password := helpers.GetTestHarborCredentials()
+
 	cmd := root.LoginCommand()
-	cmd.SetArgs([]string{"http://demo.goharbor.io"})
+	cmd.SetArgs([]string{"http://" + harborURL})
 
 	assert.NoError(t, cmd.Flags().Set("username", "does-not-exist"))
-	assert.NoError(t, cmd.Flags().Set("password", "Harbor12345"))
+	assert.NoError(t, cmd.Flags().Set("password", password))
 
 	err := cmd.Execute()
 	assert.Error(t, err, "Expected error for wrong username")
@@ -82,10 +92,13 @@ func Test_Login_Failure_WrongPassword(t *testing.T) {
 	data := helpers.Initialize(t, tempDir)
 	defer helpers.ConfigCleanup(t, data)
 
-	cmd := root.LoginCommand()
-	cmd.SetArgs([]string{"http://demo.goharbor.io"})
+	harborURL := helpers.GetTestHarborURL()
+	username, _ := helpers.GetTestHarborCredentials()
 
-	assert.NoError(t, cmd.Flags().Set("username", "admin"))
+	cmd := root.LoginCommand()
+	cmd.SetArgs([]string{"http://" + harborURL})
+
+	assert.NoError(t, cmd.Flags().Set("username", username))
 	assert.NoError(t, cmd.Flags().Set("password", "wrong"))
 
 	err := cmd.Execute()
