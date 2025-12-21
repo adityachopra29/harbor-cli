@@ -14,6 +14,7 @@
 package root_test
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/goharbor/harbor-cli/cmd/harbor/root"
@@ -31,11 +32,23 @@ func Test_Login_Success(t *testing.T) {
 	username, password := helpers.GetTestHarborCredentials()
 	
 	cmd := root.LoginCommand()
-	validServerAddresses := []string{
-		"http://" + harborURL + ":80",
-		"https://" + harborURL + ":443",
-		"http://" + harborURL,
-		"https://" + harborURL,
+	
+	// Build server addresses - if URL already has port (like "core:8080"), use it as-is
+	var validServerAddresses []string
+	if strings.Contains(harborURL, ":") {
+		// URL already has port (e.g., "core:8080" for local Dagger Harbor)
+		validServerAddresses = []string{
+			"http://" + harborURL,
+			"https://" + harborURL,
+		}
+	} else {
+		// URL is hostname only (e.g., "demo.goharbor.io")
+		validServerAddresses = []string{
+			"http://" + harborURL + ":80",
+			"https://" + harborURL + ":443",
+			"http://" + harborURL,
+			"https://" + harborURL,
+		}
 	}
 
 	for _, serverAddress := range validServerAddresses {

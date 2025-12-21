@@ -158,16 +158,17 @@ func (m *HarborCli) SetupHarbor(ctx context.Context) (*dagger.Service, error) {
 // TestWithHarbor runs all tests against a local Harbor instance
 func (m *HarborCli) TestWithHarbor(ctx context.Context) (string, error) {
 	// Setup Harbor services
-	_, err := m.SetupHarbor(ctx)
+	core, err := m.SetupHarbor(ctx)
 	if err != nil {
 		return "", fmt.Errorf("failed to setup Harbor: %w", err)
 	}
 
 	fmt.Println("🧪 Running tests against local Harbor...")
 
-	// Run tests with Harbor environment
+	// Run tests with Harbor environment - bind to the Harbor service so tests can reach it
 	test := dag.Container().
 		From("golang:"+GO_VERSION+"-alpine").
+		WithServiceBinding("core", core).  // ← CRITICAL: Binds test container to Harbor network
 		WithMountedCache("/go/pkg/mod", dag.CacheVolume("go-mod-"+GO_VERSION)).
 		WithEnvVariable("GOMODCACHE", "/go/pkg/mod").
 		WithMountedCache("/go/build-cache", dag.CacheVolume("go-build-"+GO_VERSION)).
